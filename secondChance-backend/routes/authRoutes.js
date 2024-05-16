@@ -1,7 +1,7 @@
 const express = require('express');
 const bcryptjs = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { body, validationResult } = require('express-validator')
+const { body, validationResult } = require('express-validator');
 const connectToDatabase = require('../models/db');
 const router = express.Router();
 const dotenv = require('dotenv');
@@ -11,7 +11,7 @@ dotenv.config();
 
 const logger = pino();
 
-//Step 1 - Task 4: Create JWT secret
+// Step 1 - Task 4: Create JWT secret
 const JWT_SECRET = process.env.JWT_SECRET;
 
 router.post('/register', async (req, res) => {
@@ -19,13 +19,13 @@ router.post('/register', async (req, res) => {
         // Task 1: Connect to `secondChance` in MongoDB through `connectToDatabase` in `db.js`.
         const db = await connectToDatabase();
         // Task 2: Access MongoDB `users` collection
-        const collection = db.collection("users");
+        const collection = db.collection('users');
         // Task 3: Check if user credentials already exists in the database and throw an error if they do
         const existingEmail = await collection.findOne({ email: req.body.email });
-        
+
         if (existingEmail) {
             logger.error('Email id already exists');
-            return res.status(400).json({ error: 'Email id already exists' })
+            return res.status(400).json({ error: 'Email id already exists' });
         }
         // Task 4: Create a hash to encrypt the password so that it is not readable in the database
         const salt = await bcryptjs.genSalt(10);
@@ -38,7 +38,7 @@ router.post('/register', async (req, res) => {
             lastName: req.body.lastName,
             password: hash,
             createdAt: new Date(),
-        })
+        });
         // Task 6: Create JWT authentication if passwords match with user._id as payload
         const payload = {
             user: {
@@ -52,7 +52,8 @@ router.post('/register', async (req, res) => {
         // Task 8: Return the user email and the token as a JSON
         return res.status(200).json({ authtoken, email });
     } catch (e) {
-         return res.status(500).send('Internal server error');
+        logger.error('Internal server error', e);
+        return res.status(500).send('Internal server error');
     }
 });
 
@@ -61,37 +62,36 @@ router.post('/login', async (req, res) => {
         // Task 1: Connect to `secondChance` in MongoDB through `connectToDatabase` in `db.js`.
         const db = await connectToDatabase();
         // Task 2: Access MongoDB `users` collection
-        const collection = db.collection("users");
+        const collection = db.collection('users');
         // Task 3: Check for user credentials in database
         const theUser = await collection.findOne({ email: req.body.email });
         // Task 4: Check if the password matches the encrypted password and send appropriate message on mismatch
         if (theUser) {
-            let result = await bcryptjs.compare(req.body.password, theUser.password);
+            const result = await bcryptjs.compare(req.body.password, theUser.password);
             if (!result) {
-                logger.event('Password do not match');
+                logger.error('Password does not match');
                 return res.status(404).json({ error: 'Wrong password' });
             }
-            let payload = {
+            const payload = {
                 user: {
                     id: theUser._id.toString(),
                 },
             };
-            // Task 5: Fetch user details from a database
+            // Task 5: Fetch user details from the database
             const userName = theUser.firstName;
             const userEmail = theUser.email;
             // Task 6: Create JWT authentication if passwords match with user._id as payload
             const authtoken = jwt.sign(payload, JWT_SECRET);
             logger.info('User logged in successfully');
-            res.status(200).json({ authtoken, userName, userEmail });
+            return res.status(200).json({ authtoken, userName, userEmail });
         } else {
             logger.error('User not found');
             return res.status(400).json({ error: 'User not found' });
         }
-        
         // Task 7: Send appropriate message if the user is not found
     } catch (e) {
+        logger.error('Internal server error', e);
         return res.status(500).send('Internal server error');
-
     }
 });
 
@@ -99,7 +99,7 @@ router.put('/update', async (req, res) => {
     // Task 2: Validate the input using `validationResult` and return an appropriate message if you detect an error
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        logger.error('Validation errors in update requests', errors.array());
+        logger.error('Validation errors in update request', errors.array());
         return res.status(400).json({ errors: errors.array() });
     }
     try {
@@ -108,11 +108,11 @@ router.put('/update', async (req, res) => {
 
         if (!email) {
             logger.error('Email not found in the request headers');
-            return res.status(400).json({ error: "Email not found in the request headers" });
+            return res.status(400).json({ error: 'Email not found in the request headers' });
         }
         // Task 4: Connect to MongoDB
         const db = await connectToDatabase();
-        const collection = db.collection("users");
+        const collection = db.collection('users');
         // Task 5: Find the user credentials in database
         const existingUser = await collection.findOne({ email });
 
@@ -126,18 +126,19 @@ router.put('/update', async (req, res) => {
         const updatedUser = await collection.findOneAndUpdate(
             { email },
             { $set: existingUser },
-            { returnDocument: 'after'}
+            { returnDocument: 'after' }
         );
         // Task 7: Create JWT authentication with `user._id` as a payload using the secret key from the .env file
         const payload = {
             user: {
-                id: updatedUser._id.toString(),
+                id: updatedUser.value._id.toString(),
             },
         };
         const authtoken = jwt.sign(payload, JWT_SECRET);
-        logger.info('User updated succesfully');
+        logger.info('User updated successfully');
         return res.status(200).json({ authtoken });
     } catch (e) {
+        logger.error('Internal server error', e);
         return res.status(500).send('Internal server error');
     }
 });
