@@ -1,10 +1,8 @@
-const express = require('express');
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
-const router = express.Router();
-const connectToDatabase = require('../models/db');
-const logger = require('../logger');
+const express = require('express')
+const multer = require('multer')
+const router = express.Router()
+const connectToDatabase = require('../models/db')
+const logger = require('../logger')
 
 // Define the upload directory path
 const directoryPath = 'public/images';
@@ -20,7 +18,6 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
-
 
 // Get all secondChanceItems
 router.get('/', async (req, res, next) => {
@@ -66,7 +63,6 @@ router.get('/:id', async (req, res, next) => {
         if ( !secondChanceItem ) {
             return res.status(404).send('Second Chance Items not found');
         }
-
         res.json(secondChanceItem)
     } catch (e) {
         next(e);
@@ -84,7 +80,6 @@ router.put('/:id', async(req, res,next) => {
             logger.error('secondChanceItem not found');
             return res.status(404).send('Second Chance Item not found');
         }
-
         secondChanceItem.category = req.body.category;
         secondChanceItem.condition = req.body.condition;
         secondChanceItem.age_days = req.body.age_days;
@@ -122,10 +117,8 @@ router.delete('/:id', async(req, res,next) => {
         }
         await collection.deleteOne({ id: id});
         res.json({"deleted":"success"});
-
     } catch (e) {
         next(e);
     }
 });
-
 module.exports = router;
