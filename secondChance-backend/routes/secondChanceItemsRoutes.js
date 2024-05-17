@@ -1,7 +1,5 @@
 const express = require('express')
 const multer = require('multer')
-const path = require('path')
-const fs = require('fs')
 const router = express.Router()
 const connectToDatabase = require('../models/db')
 const logger = require('../logger')
@@ -12,14 +10,14 @@ const directoryPath = 'public/images'
 // Set up storage for uploaded files
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, directoryPath); // Specify the upload directory
+    cb(null, directoryPath) // Specify the upload directory
   },
   filename: function (req, file, cb) {
-    cb(null, file.originalname); // Use the original file name
+    cb(null, file.originalname) // Use the original file name
   }
 })
 
-const upload = multer({ storage: storage });
+const upload = multer({ storage: storage })
 
 // Get all secondChanceItems
 router.get('/', async (req, res, next) => {
@@ -57,7 +55,7 @@ router.post('/', upload.single('file'), async (req, res, next) => {
     const db = await connectToDatabase()
     const collection = db.collection('secondChanceItems')
     const lastItemQuery = await collection.find().sort({ id: -1 }).limit(1).toArray()
-    let secondChanceItem = req.body
+    const secondChanceItem = req.body
     if (lastItemQuery.length > 0) {
       secondChanceItem.id = (parseInt(lastItemQuery[0].id) + 1).toString()
     } else {
@@ -71,7 +69,7 @@ router.post('/', upload.single('file'), async (req, res, next) => {
     logger.error('Error adding item', e)
     next(e)
   }
-});
+})
 
 // Update an existing item
 router.put('/:id', async (req, res, next) => {
