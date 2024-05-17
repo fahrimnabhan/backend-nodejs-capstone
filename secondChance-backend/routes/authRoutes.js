@@ -24,8 +24,8 @@ router.post('/register', async (req, res) => {
     const existingEmail = await collection.findOne({ email: req.body.email })
 
     if (existingEmail) {
-        logger.error('Email id already exists')
-        return res.status(400).json({ error: 'Email id already exists' })
+      logger.error('Email id already exists')
+      return res.status(400).json({ error: 'Email id already exists' })
     }
     // Task 4: Create a hash to encrypt the password so that it is not readable in the database
     const salt = await bcryptjs.genSalt(10)
@@ -33,17 +33,17 @@ router.post('/register', async (req, res) => {
     const email = req.body.email
     // Task 5: Insert the user into the database
     const newUser = await collection.insertOne({
-        email: req.body.email,
-        firstName: req.body.firstName,
-        lastName: req.body.lastName,
-        password: hash,
-        createdAt: new Date()
+      email: req.body.email,
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+      password: hash,
+      createdAt: new Date()
     })
     // Task 6: Create JWT authentication if passwords match with user._id as payload
     const payload = {
-        user: {
-            id: newUser.insertedId,
-        },
+      user: {
+        id: newUser.insertedId,
+      },
     }
 
     const authtoken = jwt.sign(payload, JWT_SECRET)
@@ -67,31 +67,31 @@ router.post('/login', async (req, res) => {
     const theUser = await collection.findOne({ email: req.body.email })
     // Task 4: Check if the password matches the encrypted password and send appropriate message on mismatch
     if (theUser) {
-        const result = await bcryptjs.compare(req.body.password, theUser.password);
-        if (!result) {
-            logger.error('Password does not match');
-            return res.status(404).json({ error: 'Wrong password' });
+      const result = await bcryptjs.compare(req.body.password, theUser.password);
+      if (!result) {
+        logger.error('Password does not match');
+        return res.status(404).json({ error: 'Wrong password' });
+      }
+      const payload = {
+        user: {
+          id: theUser._id.toString(),
         }
-        const payload = {
-            user: {
-                id: theUser._id.toString(),
-            }
-        }
-        // Task 5: Fetch user details from the database
-        const userName = theUser.firstName
-        const userEmail = theUser.email
-        // Task 6: Create JWT authentication if passwords match with user._id as payload
-        const authtoken = jwt.sign(payload, JWT_SECRET)
-        logger.info('User logged in successfully')
-        return res.status(200).json({ authtoken, userName, userEmail })
+      }
+      // Task 5: Fetch user details from the database
+      const userName = theUser.firstName
+      const userEmail = theUser.email
+      // Task 6: Create JWT authentication if passwords match with user._id as payload
+      const authtoken = jwt.sign(payload, JWT_SECRET)
+      logger.info('User logged in successfully')
+      return res.status(200).json({ authtoken, userName, userEmail })
     } else {
         logger.error('User not found')
         return res.status(400).json({ error: 'User not found' })
     }
     // Task 7: Send appropriate message if the user is not found
 } catch (e) {
-    logger.error('Internal server error', e)
-    return res.status(500).send('Internal server error')
+  logger.error('Internal server error', e)
+  return res.status(500).send('Internal server error')
 }
 })
 
