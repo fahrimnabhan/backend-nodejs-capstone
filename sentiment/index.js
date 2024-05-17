@@ -1,6 +1,5 @@
 require('dotenv').config()
 const express = require('express')
-const axios = require('axios')
 const logger = require('./logger')
 const expressPino = require('express-pino-logger')({ logger })
 
@@ -9,8 +8,8 @@ const natural = require('natural')
 // Task 2: Initialize the express server
 const app = express()
 const port = process.env.PORT || 3000
-app.use(express.json());
-app.use(expressPino);
+app.use(express.json())
+app.use(expressPino)
 
 // Define the sentiment analysis route
 // Task 3: Create the POST /sentiment analysis route
