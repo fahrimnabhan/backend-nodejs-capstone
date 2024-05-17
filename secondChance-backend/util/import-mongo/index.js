@@ -1,15 +1,15 @@
-require('dotenv').config()
+ require('dotenv').config()
 const MongoClient = require('mongodb').MongoClient
 const fs = require('fs')
 // MongoDB connection URL with authentication options
 const url = `${process.env.MONGO_URL}`
-const filename = `${__dirname}/secondChanceItems.json`
+const filename = path.join(`${__dirname}/secondChanceItems.json`)
 const dbName = 'secondChance'
 const collectionName = 'secondChanceItems'
 // notice you have to load the array of items into the data object
 const data = JSON.parse(fs.readFileSync(filename, 'utf8')).docs
 // connect to database and insert data into the collection
-async function loadData() {
+async function loadData () {
   const client = new MongoClient(url)
   try {
     // Connect to the MongoDB client
@@ -26,7 +26,7 @@ async function loadData() {
       const insertResult = await collection.insertMany(data)
       console.log('Inserted documents:', insertResult.insertedCount)
     } else {
-      console.log("Items already exists in DB")
+      console.log('Items already exists in DB')
     }
   } catch (err) {
     console.error(err)
