@@ -42,8 +42,8 @@ router.post('/register', async (req, res) => {
     // Task 6: Create JWT authentication if passwords match with user._id as payload
     const payload = {
       user: {
-        id: newUser.insertedId,
-      },
+        id: newUser.insertedId
+      }
     }
 
     const authtoken = jwt.sign(payload, JWT_SECRET)
@@ -51,10 +51,10 @@ router.post('/register', async (req, res) => {
     logger.info('User registered successfully')
     // Task 8: Return the user email and the token as a JSON
     return res.status(200).json({ authtoken, email })
-} catch (e) {
+  } catch (e) {
     logger.error('Internal server error', e)
     return res.status(500).send('Internal server error')
-}
+  }
 })
 
 router.post('/login', async (req, res) => {
@@ -67,14 +67,14 @@ router.post('/login', async (req, res) => {
     const theUser = await collection.findOne({ email: req.body.email })
     // Task 4: Check if the password matches the encrypted password and send appropriate message on mismatch
     if (theUser) {
-      const result = await bcryptjs.compare(req.body.password, theUser.password);
+      const result = await bcryptjs.compare(req.body.password, theUser.password)
       if (!result) {
-        logger.error('Password does not match');
-        return res.status(404).json({ error: 'Wrong password' });
+        logger.error('Password does not match')
+        return res.status(404).json({ error: 'Wrong password' })
       }
       const payload = {
         user: {
-          id: theUser._id.toString(),
+          id: theUser._id.toString()
         }
       }
       // Task 5: Fetch user details from the database
