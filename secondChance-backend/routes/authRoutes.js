@@ -104,7 +104,7 @@ router.put('/update', async (req, res) => {
   }
   try {
     // Task 3: Check if `email` is present in the header and throw an appropriate error message if it is not present
-    const email = req.headers.email  
+    const email = req.headers.email
     if (!email) {
       logger.error('Email not found in the request headers')
       return res.status(400).json({ error: 'Email not found in the request headers' })
@@ -113,7 +113,7 @@ router.put('/update', async (req, res) => {
     const db = await connectToDatabase()
     const collection = db.collection('users')
     // Task 5: Find the user credentials in database
-    const existingUser = await collection.findOne({ email })  
+    const existingUser = await collection.findOne({ email })
     if (!existingUser) {
       logger.error('User not found')
       return res.status(404).json({ error: 'User not found' })
